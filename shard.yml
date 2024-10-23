@@ -1,5 +1,5 @@
 name: pf3d
-version: 0.1.0
+version: 0.1.1
 
 authors:
   - Alex Clink <alexclink@gmail.com>
@@ -10,4 +10,5 @@ license: MIT
 
 dependencies:
   pf2d:
+    version: 0.3.0
     github: SleepingInsomniac/pf2d
