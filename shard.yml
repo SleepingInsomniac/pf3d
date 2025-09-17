@@ -10,5 +10,5 @@ license: MIT
 
 dependencies:
   pf2d:
-    version: 0.3.0
+    version: 0.3.2
     github: SleepingInsomniac/pf2d
