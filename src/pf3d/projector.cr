@@ -8,7 +8,7 @@ module PF3d
     property aspect_ratio : Float64?
     property camera : Camera
     property light : PF2d::Vec3(Float64) = PF2d::Vec[0.0, 0.0, -1.0].normalized
-    property mat_proj : PF2d::Matrix(Float64, 16)?
+    property mat_proj : PF2d::Mat4x4(Float64)?
     property clipping_plane_near : PF2d::Vec3(Float64)
     property clipping_plane_far : PF2d::Vec3(Float64)
 
@@ -21,7 +21,7 @@ module PF3d
 
     def mat_proj
       @mat_proj ||= begin
-        PF2d::Matrix[
+        PF2d::Mat4x4[
           aspect_ratio * fov_rad, 0.0, 0.0, 0.0,
           0.0, fov_rad, 0.0, 0.0,
           0.0, 0.0, far / (far - near), (-far * near) / (far - near),

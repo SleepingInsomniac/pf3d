@@ -1,9 +1,9 @@
 module PF3d
   class Transform
-    property matrix : PF2d::Matrix(Float64, 16)
+    include PF2d
 
     def self.identity
-      PF2d::Matrix[
+      Mat4x4[
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
@@ -13,7 +13,7 @@ module PF3d
 
     def self.rot_x(theta : Float64)
       cox, sox = Math.cos(theta), Math.sin(theta)
-      PF2d::Matrix[
+      Mat4x4[
         1.0, 0.0, 0.0, 0.0,
         0.0, cox, sox, 0.0,
         0.0, -sox, cox, 0.0,
@@ -23,7 +23,7 @@ module PF3d
 
     def self.rot_y(theta : Float64)
       coy, soy = Math.cos(theta), Math.sin(theta)
-      PF2d::Matrix[
+      Mat4x4[
         coy, 0.0, soy, 0.0,
         0.0, 1.0, 0.0, 0.0,
         -soy, 0.0, coy, 0.0,
@@ -33,7 +33,7 @@ module PF3d
 
     def self.rot_z(theta : Float64)
       coz, siz = Math.cos(theta), Math.sin(theta)
-      PF2d::Matrix[
+      Mat4x4[
         coz, siz, 0.0, 0.0,
         -siz, coz, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
@@ -50,7 +50,7 @@ module PF3d
     end
 
     def self.translation(x : Float64, y : Float64, z : Float64)
-      PF2d::Matrix[
+      Mat4x4[
         1.0, 0.0, 0.0, x,
         0.0, 1.0, 0.0, y,
         0.0, 0.0, 1.0, z,
@@ -63,7 +63,7 @@ module PF3d
     end
 
     def self.scale(scale : PF2d::Vec3(Float64))
-      PF2d::Matrix[
+      Mat4x4[
         scale.x, 0.0, 0.0, 0.0,
         0.0, scale.y, 0.0, 0.0,
         0.0, 0.0, scale.z, 0.0,
@@ -72,14 +72,14 @@ module PF3d
     end
 
     # Does not work for scaling, only for rotation / translation
-    def self.quick_inverse(other : PF2d::Matrix)
-      matrix = PF2d::Matrix(Float64, 16).new(4, 4)
-      matrix[0, 0] = other[0, 0]; matrix[0, 1] = other[1, 0]; matrix[0, 2] = other[2, 0]; matrix[0, 3] = 0.0
-      matrix[1, 0] = other[0, 1]; matrix[1, 1] = other[1, 1]; matrix[1, 2] = other[2, 1]; matrix[1, 3] = 0.0
-      matrix[2, 0] = other[0, 2]; matrix[2, 1] = other[1, 2]; matrix[2, 2] = other[2, 2]; matrix[2, 3] = 0.0
-      matrix[3, 0] = -(other[3, 0] * matrix[0, 0] + other[3, 1] * matrix[1, 0] + other[3, 2] * matrix[2, 0])
-      matrix[3, 1] = -(other[3, 0] * matrix[0, 1] + other[3, 1] * matrix[1, 1] + other[3, 2] * matrix[2, 1])
-      matrix[3, 2] = -(other[3, 0] * matrix[0, 2] + other[3, 1] * matrix[1, 2] + other[3, 2] * matrix[2, 2])
+    def self.quick_inverse(other : Mat4x4)
+      matrix = Mat4x4(Float64).new
+      matrix[0, 0] = other[0, 0]; matrix[1, 0] = other[0, 1]; matrix[2, 0] = other[0, 2]; matrix[3, 0] = 0.0
+      matrix[0, 1] = other[1, 0]; matrix[1, 1] = other[1, 1]; matrix[2, 1] = other[1, 2]; matrix[3, 1] = 0.0
+      matrix[0, 2] = other[2, 0]; matrix[1, 2] = other[2, 1]; matrix[2, 2] = other[2, 2]; matrix[3, 2] = 0.0
+      matrix[0, 3] = -(other[0, 3] * matrix[0, 0] + other[1, 3] * matrix[0, 1] + other[2, 3] * matrix[0, 2])
+      matrix[1, 3] = -(other[0, 3] * matrix[1, 0] + other[1, 3] * matrix[1, 1] + other[2, 3] * matrix[1, 2])
+      matrix[2, 3] = -(other[0, 3] * matrix[2, 0] + other[1, 3] * matrix[2, 1] + other[2, 3] * matrix[2, 2])
       matrix[3, 3] = 1.0
       matrix
     end
@@ -89,7 +89,7 @@ module PF3d
       new_up = (up - new_forward * up.dot(new_forward)).normalized
       new_right = new_up.cross(new_forward)
 
-      PF2d::Matrix[
+      Mat4x4[
         new_right.x, new_up.x, new_forward.x, position.x,
         new_right.y, new_up.y, new_forward.y, position.y,
         new_right.z, new_up.z, new_forward.z, position.z,
@@ -97,16 +97,18 @@ module PF3d
       ]
     end
 
-    def self.apply(point : PF2d::Vec3(Float64), matrix : PF2d::Matrix(Float64, 16))
+    def self.apply(point : PF2d::Vec3(Float64), matrix : Mat4x4(Float64))
       vec = PF2d::Vec[
-        point.x * matrix[0, 0] + point.y * matrix[1, 0] + point.z * matrix[2, 0] + matrix[3, 0],
-        point.x * matrix[0, 1] + point.y * matrix[1, 1] + point.z * matrix[2, 1] + matrix[3, 1],
-        point.x * matrix[0, 2] + point.y * matrix[1, 2] + point.z * matrix[2, 2] + matrix[3, 2],
+        point.x * matrix[0, 0] + point.y * matrix[0, 1] + point.z * matrix[0, 2] + matrix[0, 3],
+        point.x * matrix[1, 0] + point.y * matrix[1, 1] + point.z * matrix[1, 2] + matrix[1, 3],
+        point.x * matrix[2, 0] + point.y * matrix[2, 1] + point.z * matrix[2, 2] + matrix[2, 3],
       ]
-      w = point.x * matrix[0, 3] + point.y * matrix[1, 3] + point.z * matrix[2, 3] + matrix[3, 3]
+      w = point.x * matrix[3, 0] + point.y * matrix[3, 1] + point.z * matrix[3, 2] + matrix[3, 3]
       vec /= w unless w == 0.0
       {vec, w}
     end
+
+    property matrix : Mat4x4(Float64)
 
     def initialize
       @matrix = Transform.identity

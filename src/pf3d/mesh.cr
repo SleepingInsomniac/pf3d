@@ -1,6 +1,6 @@
 module PF3d
   # Mesh represents a collection of points and triangles
-  # TODO: Keep points in a collection, removing duplicates, and keep triangle verticies pointing to the points in that collection
+  # TODO: Keep points in a collection, removing duplicates, and keep triangle vertices pointing to the points in that collection
   class Mesh
     struct Material
       # @texture : Sprite

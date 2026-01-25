@@ -56,7 +56,7 @@ module PF3d
     end
 
     # Multiply all points by a *Matrix*, returning a new *Tri*
-    def *(mat : PF2d::Matrix)
+    def *(mat : PF2d::Mat4x4)
       # The transform function returns a w, which is the 4th component of the vertex
       # this is the perspective information that we can use to apply textures
       pp1, w1 = Transform.apply(@p1, mat)

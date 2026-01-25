@@ -1,5 +1,8 @@
 require "pf2d"
 
+PF2d::Matrix.define(4, 4)
+PF2d::Mat4x4.define_mul(4)
+
 module PF3d
   VERSION = {% `shards version`.chomp.stringify %}
 
