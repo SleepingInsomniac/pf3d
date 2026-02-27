@@ -1,4 +1,4 @@
-# PD3d
+# PF3d
 
 [PixelFaucet](https://github.com/sleepinginsomniac/pixelfaucet) 3D Graphics library
 
